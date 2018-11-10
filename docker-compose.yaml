@@ -52,7 +52,8 @@ services:
     networks:
       - backend
 
-# postgres 只能创建数据卷docker volume create --name=postgresdb，不能直接使用volumes
+# use "docker volume create --name=postgresdb" instead of direct mount volumes
+# don't forget add top-level volumes "postgresdb"
   postgres:
     build:
       context: ./postgres
