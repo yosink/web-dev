@@ -1,0 +1,130 @@
+version: '3'
+
+services:
+  nginx:
+    build:
+     context: ./nginx
+     dockerfile: Dockerfile
+    ports:
+      - "8888:80"
+    volumes:
+      - ${APP_CODE_PATH}:/var/www
+      - ${NGINX_LOG_PATH}:/var/log/nginx
+      - ${NGINX_SITE_PATH}:/etc/nginx/sites-available
+    depends_on:
+      - php7
+    networks: 
+      - frontend
+      - backend
+  
+  php7:
+    build:
+      context: ./php72
+      dockerfile: Dockerfile
+    volumes:
+     - ${APP_CODE_PATH}:/var/www
+    networks: 
+      - backend
+
+  php5:
+    build:
+      context: ./php5
+      dockerfile: Dockerfile
+    volumes:
+     - ${APP_CODE_PATH}:/var/www
+    networks: 
+      - backend
+
+  mysql:
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    environment:
+        - MYSQL_DATABASE=${MYSQL_DATABASE}
+        - MYSQL_USER=${MYSQL_USER}
+        - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+        - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+        - TZ=${WORKSPACE_TIMEZONE}
+    ports:
+      - "3366:3306"
+    volumes:
+      - ${MYSQL_DATA_PATH}:/var/lib/mysql
+    networks:
+      - backend
+
+# postgres 只能创建数据卷docker volume create --name=postgresdb，不能直接使用volumes
+  postgres:
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - PGD​​ATA=/tmp
+    volumes:
+      - postgresdb:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks: 
+      - backend
+
+  redis:
+    image: redis:4
+    ports:
+      - "63790:6379"
+    networks: 
+      - backend
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.4.1
+    container_name: elastic
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./esdata1:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - esnet
+
+  elasticsearch2:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.4.1
+    container_name: elastic2
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "discovery.zen.ping.unicast.hosts=elasticsearch"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./esdata2:/usr/share/elasticsearch/data
+    networks:
+      - esnet
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:6.4.1
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    networks:
+      - esnet
+
+networks: 
+  frontend:
+  backend:
+  esnet:
+
+volumes:
+  postgresdb:
+    external: true

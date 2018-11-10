@@ -1,0 +1,2 @@
+2018/11/09 10:19:34 [emerg] 1#1: no port in upstream "php-upstream" in /etc/nginx/sites-available/default.conf:16
+2018/11/10 01:57:30 [emerg] 1#1: no port in upstream "php-upstream" in /etc/nginx/sites-available/default.conf:16

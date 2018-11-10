@@ -1,0 +1,6 @@
+/esdata1/nodes
+/esdata2/nodes
+/mysql/data/*
+*.tgz
+/websites/*
+.env
