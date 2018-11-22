@@ -23,18 +23,19 @@ RUN mv /etc/apt/sources.list /etc/apt/sources.list.backup \
 	        libpng-dev \
 	        libzip-dev \
 	        libpq-dev \
+	        procps \
 	    && docker-php-ext-install -j$(nproc) iconv \
 	    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
 	    && docker-php-ext-install -j$(nproc) gd \ 
 	    && docker-php-ext-configure zip --with-libzip \
         && docker-php-ext-install zip \
         && docker-php-ext-install bcmath \
-        && docker-php-ext-install pdo pdo_mysql pdo_pgsql
+        && docker-php-ext-install mysqli pdo pdo_mysql pdo_pgsql
 		
-COPY ./swoole-4.2.1.tgz /tmp
+COPY ./swoole-4.2.7.tgz /tmp
 RUN mkdir -p /tmp/swoole \
-	&& tar -xf /tmp/swoole-4.2.1.tgz -C /tmp/swoole --strip-components=1 \
-    && rm /tmp/swoole-4.2.1.tgz \
+	&& tar -xf /tmp/swoole-4.2.7.tgz -C /tmp/swoole --strip-components=1 \
+    && rm /tmp/swoole-4.2.7.tgz \
     && docker-php-ext-configure /tmp/swoole \
     && docker-php-ext-install /tmp/swoole \
     && rm -r /tmp/swoole

@@ -6,22 +6,22 @@ server {
     root /var/www/yundian-buyer/public;
     index index.php index.html index.htm;
 
-    #location / {
-    #     try_files $uri $uri/ /index.php$is_args$args;
-    #}
     location / {
-       if (!-e $request_filename) {
+         #try_files $uri $uri/ /index.php$is_args$args;
+         if (!-e $request_filename) {
            rewrite  ^(.*)$  /index.php?s=/$1  last;
            break;
        }
     }
 
-    location ~ \.php$ {
-        try_files $uri /index.php =404;
+    location ~ \.php {
+        #try_files $uri /index.php =404;
         fastcgi_pass php5:9000;
         fastcgi_index index.php;
         fastcgi_buffers 16 16k;
         fastcgi_buffer_size 32k;
+        fastcgi_split_path_info ^(.+\.php)(.*)$;                             
+        fastcgi_param PATH_INFO $fastcgi_path_info; 
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         #fixes timeouts
         fastcgi_read_timeout 600;

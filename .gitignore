@@ -1,6 +1,7 @@
-/esdata1/nodes
-/esdata2/nodes
+/esdata1/*
+/esdata2/*
 /mysql/data/*
 *.tgz
 /websites/*
 .env
+nginx/logs/*

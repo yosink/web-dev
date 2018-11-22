@@ -6,13 +6,14 @@ services:
      context: ./nginx
      dockerfile: Dockerfile
     ports:
-      - "8888:80"
+      - "80:80"
     volumes:
       - ${APP_CODE_PATH}:/var/www
       - ${NGINX_LOG_PATH}:/var/log/nginx
       - ${NGINX_SITE_PATH}:/etc/nginx/sites-available
     depends_on:
       - php7
+      - php5
     networks: 
       - frontend
       - backend
@@ -46,7 +47,7 @@ services:
         - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
         - TZ=${WORKSPACE_TIMEZONE}
     ports:
-      - "3366:3306"
+      - "3306:3306"
     volumes:
       - ${MYSQL_DATA_PATH}:/var/lib/mysql
     networks:
@@ -71,14 +72,14 @@ services:
       - backend
 
   redis:
-    image: redis:4
+    image: redis:5
     ports:
-      - "63790:6379"
+      - "6379:6379"
     networks: 
       - backend
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.4.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.4.3
     container_name: elastic
     environment:
       - cluster.name=docker-cluster
@@ -96,7 +97,7 @@ services:
       - esnet
 
   elasticsearch2:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.4.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.4.3
     container_name: elastic2
     environment:
       - cluster.name=docker-cluster
@@ -113,7 +114,7 @@ services:
       - esnet
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:6.4.1
+    image: docker.elastic.co/kibana/kibana:6.4.3
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
     ports:

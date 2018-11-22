@@ -22,14 +22,23 @@ RUN mv /etc/apt/sources.list /etc/apt/sources.list.backup \
 	        libjpeg62-turbo-dev \
 	        libpng-dev \
 	        libzip-dev \
+	        procps \
 	    && docker-php-ext-install -j$(nproc) iconv \
 	    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
 	    && docker-php-ext-install -j$(nproc) gd \ 
 	    && docker-php-ext-configure zip --with-libzip \
         && docker-php-ext-install zip \
-        && docker-php-ext-install bcmath 
+        && docker-php-ext-install bcmath \
+        && docker-php-ext-install mysql pdo pdo_mysql
 		
 	
+COPY ./redis-4.1.1.tgz /tmp
+RUN mkdir -p /tmp/redis \
+	&& tar -xf /tmp/redis-4.1.1.tgz -C /tmp/redis --strip-components=1 \
+    && rm /tmp/redis-4.1.1.tgz \
+    && docker-php-ext-configure /tmp/redis \
+    && docker-php-ext-install /tmp/redis \
+    && rm -r /tmp/redis
 
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
@@ -40,6 +49,8 @@ COPY ./php5.6.ini /usr/local/etc/php/php.ini
 USER root
 
 RUN usermod -u 1000 www-data
+
+WORKDIR /var/www
 
 CMD ["php-fpm"]
 
