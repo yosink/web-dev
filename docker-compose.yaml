@@ -24,6 +24,9 @@ services:
       dockerfile: Dockerfile
     volumes:
      - ${APP_CODE_PATH}:/var/www
+     - ./php72/debug_log:/var/log/xdebug
+    ports:
+      - "9099:9099"
     networks: 
       - backend
 
@@ -121,6 +124,15 @@ services:
       - "5601:5601"
     networks:
       - esnet
+
+  swoole:
+    build:
+      context: ./swoole
+      dockerfile: Dockerfile
+    volumes:
+     - ${APP_CODE_PATH}:/var/www
+    networks: 
+      - backend
 
 networks: 
   frontend:

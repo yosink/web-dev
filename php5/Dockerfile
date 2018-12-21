@@ -32,10 +32,10 @@ RUN mv /etc/apt/sources.list /etc/apt/sources.list.backup \
         && docker-php-ext-install mysql pdo pdo_mysql
 		
 	
-COPY ./redis-4.1.1.tgz /tmp
+COPY ./redis-4.2.0.tgz /tmp
 RUN mkdir -p /tmp/redis \
-	&& tar -xf /tmp/redis-4.1.1.tgz -C /tmp/redis --strip-components=1 \
-    && rm /tmp/redis-4.1.1.tgz \
+	&& tar -xf /tmp/redis-4.2.0.tgz -C /tmp/redis --strip-components=1 \
+    && rm /tmp/redis-4.2.0.tgz \
     && docker-php-ext-configure /tmp/redis \
     && docker-php-ext-install /tmp/redis \
     && rm -r /tmp/redis

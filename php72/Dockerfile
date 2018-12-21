@@ -40,10 +40,10 @@ RUN mkdir -p /tmp/swoole \
     && docker-php-ext-install /tmp/swoole \
     && rm -r /tmp/swoole
 	
-COPY ./redis-4.1.1.tgz /tmp
+COPY ./redis-4.2.0.tgz /tmp
 RUN mkdir -p /tmp/redis \
-	&& tar -xf /tmp/redis-4.1.1.tgz -C /tmp/redis --strip-components=1 \
-    && rm /tmp/redis-4.1.1.tgz \
+	&& tar -xf /tmp/redis-4.2.0.tgz -C /tmp/redis --strip-components=1 \
+    && rm /tmp/redis-4.2.0.tgz \
     && docker-php-ext-configure /tmp/redis \
     && docker-php-ext-install /tmp/redis \
     && rm -r /tmp/redis
@@ -55,6 +55,14 @@ RUN mkdir -p /tmp/yaf \
     && docker-php-ext-configure /tmp/yaf \
     && docker-php-ext-install /tmp/yaf \
     && rm -r /tmp/yaf
+
+COPY ./xdebug-2.7.0beta1.tgz /tmp
+RUN mkdir -p /tmp/xdebug \
+	&& tar -xf /tmp/xdebug-2.7.0beta1.tgz -C /tmp/xdebug --strip-components=1 \
+    && rm /tmp/xdebug-2.7.0beta1.tgz \
+    && docker-php-ext-configure /tmp/xdebug \
+    && docker-php-ext-install /tmp/xdebug \
+    && rm -r /tmp/xdebug
 
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
@@ -70,4 +78,4 @@ WORKDIR /var/www
 
 CMD ["php-fpm"]
 
-EXPOSE 9000
+EXPOSE 9000 9099
