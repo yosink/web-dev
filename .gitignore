@@ -2,6 +2,6 @@
 /esdata2/*
 /mysql/data/*
 *.tgz
-/websites/*
+/websites
 .env
-nginx/logs/*
+nginx/logs
