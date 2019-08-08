@@ -1,0 +1,7 @@
+/esdata1/*
+/esdata2/*
+/mysql/data/*
+*.tgz
+/websites/*
+.env
+nginx/logs/*
