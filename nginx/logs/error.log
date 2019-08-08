@@ -1,0 +1,7 @@
+2018/11/09 10:19:34 [emerg] 1#1: no port in upstream "php-upstream" in /etc/nginx/sites-available/default.conf:16
+2018/11/10 01:57:30 [emerg] 1#1: no port in upstream "php-upstream" in /etc/nginx/sites-available/default.conf:16
+2018/12/14 08:57:45 [emerg] 1#1: invalid port in upstream ":" in /etc/nginx/conf.d/upstream.conf:1
+2018/12/14 08:58:07 [emerg] 1#1: invalid port in upstream ":" in /etc/nginx/conf.d/upstream.conf:1
+2018/12/14 09:02:15 [emerg] 1#1: invalid port in upstream ":" in /etc/nginx/conf.d/upstream.conf:1
+2018/12/14 09:02:33 [emerg] 1#1: invalid port in upstream ":" in /etc/nginx/conf.d/upstream.conf:1
+2018/12/14 09:41:25 [emerg] 1#1: invalid port in upstream ":" in /etc/nginx/conf.d/upstream.conf:1

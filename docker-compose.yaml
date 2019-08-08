@@ -1,6 +1,43 @@
 version: '3'
 
 services:
+  nginx:
+    build:
+     context: ./nginx
+     dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    volumes:
+      - ${APP_CODE_PATH}:/var/www
+      - ${NGINX_LOG_PATH}:/var/log/nginx
+      - ${NGINX_SITE_PATH}:/etc/nginx/sites-available
+    depends_on:
+      - php7
+      - php5
+    networks: 
+      - frontend
+      - backend
+  
+  php7:
+    build:
+      context: ./php72
+      dockerfile: Dockerfile
+    volumes:
+     - ${APP_CODE_PATH}:/var/www
+     - ./php72/debug_log:/var/log/xdebug
+    ports:
+      - "9099:9099"
+    networks: 
+      - backend
+
+  php5:
+    build:
+      context: ./php5
+      dockerfile: Dockerfile
+    volumes:
+     - ${APP_CODE_PATH}:/var/www
+    networks: 
+      - backend
 
   mysql:
     build:
@@ -29,6 +66,24 @@ services:
       - "6080:2080"
     depends_on:
         - beanstalkd
+
+# use "docker volume create --name=postgresdb" instead of direct mount volumes
+# don't forget add top-level volumes "postgresdb"
+  postgres:
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - PGD​​ATA=/tmp
+    volumes:
+      - postgresdb:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks: 
+      - backend
 
   redis:
     image: redis:5
@@ -79,5 +134,11 @@ services:
     networks:
       - esnet
 
-networks:
+networks: 
+  frontend:
+  backend:
   esnet:
+
+volumes:
+  postgresdb:
+    external: true
