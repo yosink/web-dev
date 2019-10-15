@@ -8,9 +8,9 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ${APP_CODE_PATH}:/var/www
-      - ${NGINX_LOG_PATH}:/var/log/nginx
-      - ${NGINX_SITE_PATH}:/etc/nginx/sites-available
+      - ./websites:/var/www
+      - ./nginx/logs:/var/log/nginx
+      - ./nginx/sites:/etc/nginx/sites-available
     depends_on:
       - php7
       - php5
@@ -23,7 +23,7 @@ services:
       context: ./php72
       dockerfile: Dockerfile
     volumes:
-     - ${APP_CODE_PATH}:/var/www
+     - ./websites:/var/www
      - ./php72/debug_log:/var/log/xdebug
     ports:
       - "9099:9099"
@@ -35,7 +35,7 @@ services:
       context: ./php5
       dockerfile: Dockerfile
     volumes:
-     - ${APP_CODE_PATH}:/var/www
+     - ./websites:/var/www
     networks: 
       - backend
 
@@ -69,31 +69,34 @@ services:
 
 # use "docker volume create --name=postgresdb" instead of direct mount volumes
 # don't forget add top-level volumes "postgresdb"
-  postgres:
-    build:
-      context: ./postgres
-      dockerfile: Dockerfile
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - PGD​​ATA=/tmp
-    volumes:
-      - postgresdb:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    networks: 
-      - backend
+  # postgres:
+  #   build:
+  #     context: ./postgres
+  #     dockerfile: Dockerfile
+  #   environment:
+  #     - POSTGRES_USER=${POSTGRES_USER}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  #     - POSTGRES_DB=${POSTGRES_DB}
+  #     - PGD​​ATA=/tmp
+  #   volumes:
+  #     - postgresdb:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   networks: 
+  #     - backend
 
   redis:
     image: redis:5
     ports:
       - "6379:6379"
 
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.4.3
-    container_name: elastic
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.3.1
+    container_name: es01
     environment:
+      - node.name=es01
+      - discovery.seed_hosts=es02
+      - cluster.initial_master_nodes=es01,es02
       - cluster.name=docker-cluster
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
@@ -108,14 +111,16 @@ services:
     networks:
       - esnet
 
-  elasticsearch2:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.4.3
-    container_name: elastic2
+  es02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.3.1
+    container_name: es02
     environment:
+      - node.name=es02
+      - discovery.seed_hosts=es01
+      - cluster.initial_master_nodes=es01,es02
       - cluster.name=docker-cluster
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - "discovery.zen.ping.unicast.hosts=elasticsearch"
     ulimits:
       memlock:
         soft: -1
@@ -126,9 +131,10 @@ services:
       - esnet
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:6.4.3
+    image: docker.elastic.co/kibana/kibana:7.3.1
     environment:
-      ELASTICSEARCH_URL: http://elasticsearch:9200
+      SERVER_NAME: kibana.me
+      ELASTICSEARCH_HOSTS: http://es01:9200
     ports:
       - "5601:5601"
     networks:
@@ -139,6 +145,6 @@ networks:
   backend:
   esnet:
 
-volumes:
-  postgresdb:
-    external: true
+# volumes:
+#   postgresdb:
+#     external: true
