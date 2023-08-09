@@ -6,15 +6,17 @@ jobs:
   release-new:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2 # 先检出代码
-      - run: cat .version
+      - uses: actions/checkout@v3 # 先检出代码
+      - uses: juliangruber/read-file-action@v1
+        with:
+          path: ./.version
         id: read-version
       - uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.MY_TOKEN }} # 这块需要用到 github的token，因为需要对分之进行代码推送
         with:
           tag_name: v${{ steps.read-version.outputs }}
-          release_name: Release v${{ steps.read-version.outputs }}
+          release_name: Release v${{ steps.read-version.outputs.content }}
           prerelease: false # 是否为预发布版本
           body: |
             some describe
