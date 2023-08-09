@@ -1,0 +1,17 @@
+on:
+  pull_request:
+    branches:
+    - release
+jobs:
+  release-new:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }} # 这块需要用到 github的token，因为需要对分之进行代码推送
+        with:
+          tag_name: v${{ version }}
+          release_name: Release v${{ version }}
+          prerelease: false # 是否为预发布版本
+          body: |
+            some describe
