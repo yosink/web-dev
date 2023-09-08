@@ -39,6 +39,17 @@ services:
     networks: 
       - backend
 
+  rabbit:
+    build: 
+      context: ./rabbitmq
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_USER=root
+      - RABBITMQ_DEFAULT_PASS=password
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
   mysql:
     build:
       context: ./mysql
