@@ -1,0 +1,215 @@
+version: "3"
+
+services:
+  # nginx:
+  #   build:
+  #    context: ./nginx
+  #    dockerfile: Dockerfile
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./websites:/var/www
+  #     - ./nginx/logs:/var/log/nginx
+  #     - ./nginx/sites:/etc/nginx/sites-available
+  #   depends_on:
+  #     - php7
+  #     - php5
+  #   networks:
+  #     - frontend
+  #     - backend
+
+  # php7:
+  #   build:
+  #     context: ./php72
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #    - ./websites:/var/www
+  #    - ./php72/debug_log:/var/log/xdebug
+  #   ports:
+  #     - "9099:9099"
+  #   networks:
+  #     - backend
+
+  # php5:
+  #   build:
+  #     context: ./php5
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #    - ./websites:/var/www
+  #   networks:
+  #     - backend
+
+  mysql:
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    # image: mysql/mysql-server:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_ROOT_HOST=%
+      - TZ=Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysqldb:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+
+  beanstalkd:
+    build:
+      context: ./beanstalkd
+      dockerfile: Dockerfile
+    ports:
+      - "11300:11300"
+
+  beanstalkd-console:
+    build:
+      context: ./beanstalkd_console
+      dockerfile: Dockerfile
+    ports:
+      - "6080:2080"
+    depends_on:
+      - beanstalkd
+
+  # use "docker volume create --name=postgresdb" instead of direct mount volumes
+  # don't forget add top-level volumes "postgresdb"
+  pg14:
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      # - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgresdb:/var/lib/postgresql/data
+    # networks:
+    #   - backend
+
+  redis:
+    build:
+      context: ./redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+
+  rabbit:
+    build:
+      context: ./rabbitmq
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_USER=root
+      - RABBITMQ_DEFAULT_PASS=password
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  etcd:
+    image: "bitnami/etcd:3.5"
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_ADVERTISE_CLIENT_URLS=http://0.0.0.0:2379
+    ports:
+      - 2379:2379
+      - 2380:2380
+
+  meili:
+    image: getmeili/meilisearch:v1.3
+    environment:
+      - MEILI_MASTER_KEY=mGdF4LXKXpEjob5oE4wPOSCw32I_r2X8oQM1YB8k15g
+    ports:
+      - "7700:7700"
+    volumes:
+      - ./meilisearch/data:/meili_data
+
+  mongo:
+    image: mongo:7.0.2-jammy
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - 27017:27017
+
+  mongo-express:
+    image: mongo-express
+    # restart: always
+    # depends_on:
+    #   - mongo
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: password
+      # ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      # ME_CONFIG_MONGODB_ADMINPASSWORD: c61ZGEjeMw78cFbdUu7W6cUUgzUz
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: "false"
+      ME_CONFIG_MONGODB_AUTH_USERNAME: "admin"
+      ME_CONFIG_MONGODB_AUTH_PASSWORD: "kqQCuw2GFi2dykiZ"
+      ME_CONFIG_MONGODB_AUTH_DATABASE: "admin"
+      # ME_CONFIG_MONGODB_URL: mongodb://root:password@mongo:27017/
+      ME_CONFIG_MONGODB_URL: mongodb://admin:kqQCuw2GFi2dykiZ@10.11.0.160:27017
+
+  # es01:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:7.3.1
+  #   container_name: es01
+  #   environment:
+  #     - node.name=es01
+  #     - discovery.seed_hosts=es02
+  #     - cluster.initial_master_nodes=es01,es02
+  #     - cluster.name=docker-cluster
+  #     - bootstrap.memory_lock=true
+  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  #   ulimits:
+  #     memlock:
+  #       soft: -1
+  #       hard: -1
+  #   volumes:
+  #     - ./esdata1:/usr/share/elasticsearch/data
+  #   ports:
+  #     - 9200:9200
+  #   networks:
+  #     - esnet
+
+  # es02:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:7.3.1
+  #   container_name: es02
+  #   environment:
+  #     - node.name=es02
+  #     - discovery.seed_hosts=es01
+  #     - cluster.initial_master_nodes=es01,es02
+  #     - cluster.name=docker-cluster
+  #     - bootstrap.memory_lock=true
+  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  #   ulimits:
+  #     memlock:
+  #       soft: -1
+  #       hard: -1
+  #   volumes:
+  #     - ./esdata2:/usr/share/elasticsearch/data
+  #   networks:
+  #     - esnet
+
+  # kibana:
+  #   image: docker.elastic.co/kibana/kibana:7.3.1
+  #   environment:
+  #     SERVER_NAME: kibana.me
+  #     ELASTICSEARCH_HOSTS: http://es01:9200
+  #   ports:
+  #     - "5601:5601"
+  #   networks:
+  #     - esnet
+
+# networks:
+#   frontend:
+#   backend:
+#   esnet:
+
+volumes:
+  postgresdb:
+    # external: true
+  mysqldb:
