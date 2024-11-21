@@ -39,7 +39,7 @@ services:
   #   networks:
   #     - backend
 
-  mysql:
+  web-mysql:
     build:
       context: ./mysql
       dockerfile: Dockerfile
@@ -72,7 +72,7 @@ services:
 
   # use "docker volume create --name=postgresdb" instead of direct mount volumes
   # don't forget add top-level volumes "postgresdb"
-  pg14:
+  web-pg14:
     build:
       context: ./postgres
       dockerfile: Dockerfile
@@ -88,17 +88,17 @@ services:
     # networks:
     #   - backend
 
-  redis:
+  web-redis:
     build:
       context: ./redis
     restart: unless-stopped
     ports:
       - "6380:6379"
 
-  rabbit:
+  web-rabbit:
     build:
       context: ./rabbitmq
-    restart: unless-stopped
+    # restart: unless-stopped
     environment:
       - RABBITMQ_DEFAULT_USER=root
       - RABBITMQ_DEFAULT_PASS=password
@@ -126,7 +126,7 @@ services:
 
   mongo:
     image: mongo:7.0.2-jammy
-    restart: always
+    # restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
@@ -203,6 +203,15 @@ services:
   #     - "5601:5601"
   #   networks:
   #     - esnet
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Password123$
+      # - MSSQL_PID=Express
+    ports:
+      - "2433:1433"
 
 # networks:
 #   frontend:
